@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Ingénieur_Dawin_PariTrack</title>
+<style>
+  :root {
+    --bg: #020617;
+    --card: #0f172a;
+    --border: #1e293b;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --muted2: #475569;
+    --lime: #a3e635;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --sky: #38bdf8;
+    --fuchsia: #e879f9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding-bottom: 60px; min-height: 100vh; }
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(2,6,23,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; }
+  .back-btn { background:none; border:none; color:var(--muted); font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; padding:4px 0; }
+  main { padding: 16px; }
+  h2 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .month-card { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .month-card .label { font-size:12px; color:var(--muted); margin:0 0 2px; }
+  .month-card .value { font-size:16px; font-weight:700; margin:0; }
+  .month-stats { display:flex; gap:16px; text-align:right; }
+  .month-stats .n { font-size:18px; font-weight:700; line-height:1; margin:0; }
+  .month-stats .l { font-size:10px; color:var(--muted); margin:4px 0 0; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .tile {
+    background: var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:16px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:12px;
+    color: var(--text); font-family: inherit;
+  }
+  .tile:active { border-color:#334155; }
+  .tile-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .tile-title { font-weight:700; font-size:14px; margin:0; }
+  .tile-sub { font-size:11px; color:var(--muted); margin:2px 0 0; }
+  select, input[type=text], input[type=number], input[type=password] {
+    width:100%; background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:10px 12px; font-size:14px; color:var(--text); font-family:inherit;
+  }
+  select:focus, input:focus { outline:2px solid var(--lime); }
+  label.field-label { display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+  .field { margin-bottom:16px; }
+  .tabs { display:flex; gap:4px; background:var(--card); border-radius:10px; padding:4px; margin-bottom:16px; }
+  .tab-btn { flex:1; padding:8px; border:none; border-radius:8px; font-size:12px; font-weight:700; background:none; color:var(--muted); cursor:pointer; }
+  .tab-btn.active { background:var(--lime); color:#020617; }
+  .ticket-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; margin-bottom:12px; }
+  .ticket-card img { width:80px; height:80px; object-fit:cover; flex-shrink:0; }
+  .ticket-body { padding:12px; flex:1; min-width:0; }
+  .ticket-row { display:flex; align-items:center; justify-content:space-between; }
+  .badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; }
+  .badge.won { background:rgba(163,230,53,0.2); color:var(--lime); }
+  .badge.lost { background:rgba(248,113,113,0.2); color:var(--red); }
+  .ticket-teams { font-size:14px; font-weight:600; margin:6px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ticket-amounts { display:flex; justify-content:space-between; font-size:12px; }
+  .empty { text-align:center; color:var(--muted2); font-size:13px; padding:40px 0; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; }
+  .stat-card .label { font-size:11px; color:var(--muted); margin:0 0 4px; }
+  .stat-card .value { font-size:20px; font-weight:700; margin:0; font-variant-numeric:tabular-nums; }
+  .team-list-title { font-size:12px; font-weight:700; margin:0 0 8px; display:flex; align-items:center; gap:6px; }
+  .team-row { display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:6px; font-size:14px; }
+  .champ-row { display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:14px; }
+  .champ-highlight { background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:14px; padding:16px; margin-bottom:16px; }
+  .btn-primary { width:100%; background:var(--lime); color:#020617; border:none; border-radius:10px; padding:11px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-primary:disabled { opacity:0.6; }
+  .btn-secondary { flex:1; background:none; border:1px solid var(--border); color:#cbd5e1; border-radius:10px; padding:11px; font-weight:600; font-size:14px; cursor:pointer; }
+  .btn-row { display:flex; gap:8px; margin-top:8px; }
+  .toggle-row { display:flex; gap:4px; background:var(--card); border-radius:10px; padding:4px; }
+  .toggle-btn { flex:1; padding:9px; border:none; border-radius:8px; font-weight:700; font-size:14px; background:none; color:var(--muted); cursor:pointer; }
+  .toggle-btn.active-won { background:var(--lime); color:#020617; }
+  .toggle-btn.active-lost { background:var(--red); color:#020617; }
+  .upload-box { width:100%; height:140px; border:2px dashed var(--border); border-radius:14px; background:var(--card); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; cursor:pointer; }
+  .upload-box img { width:100%; height:100%; object-fit:cover; }
+  .upload-placeholder { color:var(--muted); font-size:12px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .upload-box input[type=file] { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+  .remove-img { margin-top:8px; background:none; border:none; color:var(--muted); font-size:12px; text-decoration:underline; cursor:pointer; padding:0; }
+  .error-text { color:var(--red); font-size:12px; margin:8px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  "use strict";
+
+  var MOIS_KREYOL = ["Janvye","Fevriye","Mas","Avril","Me","Jen","Jiyè","Out","Septanm","Oktòb","Novanm","Desanm"];
+
+  function monthKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  function monthLabel(key) {
+    var parts = key.split("-");
+    var y = Number(parts[0]), m = Number(parts[1]);
+    return MOIS_KREYOL[m - 1] + " " + y;
+  }
+  function lastNMonths(n) {
+    var arr = [];
+    var now = new Date();
+    for (var i = 0; i < n; i++) {
+      var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      arr.push(monthKey(d));
+    }
+    return arr;
+  }
+  function fmtMoney(n) {
+    var v = Number(n) || 0;
+    return v.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+  }
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---- state ----
+  var tickets = [];
+  try {
+    tickets = JSON.parse(localStorage.getItem("paritrack_tickets") || "[]");
+  } catch (e) {
+    tickets = [];
+  }
+  var screen = "dashboard";
+  var selMonth = monthKey(new Date());
+  var ticketFilter = "tout";
+  var formResult = "genyen";
+  var pendingScreenshot = null;
+
+  function persistTickets() {
+    try {
+      localStorage.setItem("paritrack_tickets", JSON.stringify(tickets));
+    } catch (e) {
+      console.error("Erè pandan n ap sove:", e);
+    }
+  }
+
+  function monthTickets() {
+    return tickets.filter(function (t) { return t.month === selMonth; });
+  }
+
+  // ---- navigation ----
+  window.goScreen = function (s) {
+    screen = s;
+    if (s === "ajoute") {
+      pendingScreenshot = null;
+      formResult = "genyen";
+    }
+    render();
+  };
+  window.setMonth = function (v) {
+    selMonth = v;
+    render();
+  };
+  window.setFilter = function (f) {
+    ticketFilter = f;
+    render();
+  };
+  window.setFormResult = function (r) {
+    formResult = r;
+    var wonField = document.getElementById("field-amountWon");
+    if (wonField) wonField.style.display = r === "genyen" ? "block" : "none";
+    var wonBtn = document.getElementById("btn-result-genyen");
+    var lostBtn = document.getElementById("btn-result-pedi");
+    if (wonBtn && lostBtn) {
+      wonBtn.className = "toggle-btn" + (r === "genyen" ? " active-won" : "");
+      lostBtn.className = "toggle-btn" + (r === "pedi" ? " active-lost" : "");
+    }
+  };
+  window.handleFile = function (evt) {
+    var file = evt.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      pendingScreenshot = reader.result;
+      render();
+    };
+    reader.readAsDataURL(file);
+  };
+  window.removeScreenshot = function () {
+    pendingScreenshot = null;
+    render();
+  };
+  window.submitTicket = function (evt) {
+    evt.preventDefault();
+    var month = document.getElementById("f-month").value;
+    var amountPlayed = Number(document.getElementById("f-amountPlayed").value);
+    var amountWonInput = document.getElementById("f-amountWon");
+    var amountWon = amountWonInput ? Number(amountWonInput.value) : 0;
+    var teams = document.getElementById("f-teams").value.trim();
+    var championship = document.getElementById("f-championship").value.trim();
+    var errEl = document.getElementById("f-error");
+
+    if (!amountPlayed || amountPlayed <= 0) {
+      errEl.textContent = "Mete kantite kòb ou jwe a.";
+      return;
+    }
+    if (formResult === "genyen" && (!amountWon || amountWon <= 0)) {
+      errEl.textContent = "Mete kantite kòb ou genyen an.";
+      return;
+    }
+    errEl.textContent = "";
+
+    tickets.push({
+      id: uid(),
+      month: month,
+      amountPlayed: amountPlayed,
+      result: formResult,
+      amountWon: formResult === "genyen" ? amountWon : 0,
+      teams: teams,
+      championship: championship,
+      screenshot: pendingScreenshot,
+      createdAt: Date.now(),
+    });
+    persistTickets();
+    screen = "dashboard";
+    render();
+  };
+
+  // ---- render helpers ----
+  function iconTile(emoji, bg) {
+    return '<div class="tile-icon" style="background:' + bg + '">' + emoji + "</div>";
+  }
+
+  function renderDashboard() {
+    var mt = monthTickets();
+    var won = mt.filter(function (t) { return t.result === "genyen"; }).length;
+    var lost = mt.filter(function (t) { return t.result === "pedi"; }).length;
+
+    var html = "";
+    html += '<div class="card month-card">';
+    html += '<div><p class="label">Mwa aktyèl</p><p class="value">' + esc(monthLabel(selMonth)) + "</p></div>";
+    html += '<div class="month-stats">';
+    html += '<div><p class="n" style="color:var(--lime)">' + won + '</p><p class="l">Genyen</p></div>';
+    html += '<div><p class="n" style="color:var(--red)">' + lost + '</p><p class="l">Pedi</p></div>';
+    html += "</div></div>";
+
+    html += '<div class="grid-2">';
+    html += '<button class="tile" onclick="goScreen(\'fich\')">' + iconTile("🎫", "var(--lime)") +
+      '<div><p class="tile-title">Fich yo</p><p class="tile-sub">' + mt.length + ' fich mwa sa a</p></div></button>';
+    html += '<button class="tile" onclick="goScreen(\'kob\')">' + iconTile("💰", "var(--amber)") +
+      '<div><p class="tile-title">Kòb</p><p class="tile-sub">Jwe, genyen, pedi & benefis</p></div></button>';
+    html += '<button class="tile" onclick="goScreen(\'chanpyona\')">' + iconTile("🏆", "var(--sky)") +
+      '<div><p class="tile-title">Chanpyona yo</p><p class="tile-sub">Ki chanpyona w jwe</p></div></button>';
+    html += '<button class="tile" onclick="goScreen(\'ajoute\')">' + iconTile("📷", "var(--fuchsia)") +
+      '<div><p class="tile-title">Ajoute Fich</p><p class="tile-sub">Telechaje yon captura</p></div></button>';
+    html += "</div>";
+    return html;
+  }
+
+  function renderMonthPicker() {
+    var months = lastNMonths(9);
+    var html = '<div class="field"><label class="field-label">Chwazi mwa a</label>';
+    html += '<select onchange="setMonth(this.value)">';
+    months.forEach(function (m) {
+      html += '<option value="' + m + '"' + (m === selMonth ? " selected" : "") + ">" + esc(monthLabel(m)) + "</option>";
+    });
+    html += "</select></div>";
+    return html;
+  }
+
+  function renderTicketCard(t) {
+    var won = t.result === "genyen";
+    var html = '<div class="ticket-card">';
+    if (t.screenshot) html += '<img src="' + t.screenshot + '" alt="Fich" />';
+    html += '<div class="ticket-body">';
+    html += '<div class="ticket-row"><span class="badge ' + (won ? "won" : "lost") + '">' + (won ? "GENYEN" : "PEDI") + "</span>";
+    html += '<span class="muted" style="font-size:10px">' + esc(t.championship || "—") + "</span></div>";
+    html += '<p class="ticket-teams">' + esc(t.teams || "Ekip pa presize") + "</p>";
+    html += '<div class="ticket-amounts"><span class="muted">Jwe: ' + fmtMoney(t.amountPlayed) + " G</span>";
+    html += '<span style="font-weight:700;color:' + (won ? "var(--lime)" : "var(--red)") + '">' +
+      (won ? "+" : "-") + fmtMoney(won ? t.amountWon : t.amountPlayed) + " G</span></div>";
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderFich() {
+    var mt = monthTickets();
+    var filtered = mt.filter(function (t) {
+      if (ticketFilter === "genyen") return t.result === "genyen";
+      if (ticketFilter === "pedi") return t.result === "pedi";
+      return true;
+    });
+    var won = mt.filter(function (t) { return t.result === "genyen"; }).length;
+    var lost = mt.filter(function (t) { return t.result === "pedi"; }).length;
+
+    var html = "<h2>Fich yo</h2>";
+    html += '<p class="muted" style="margin-bottom:16px">' + mt.length + " fich antou — " + won + " genyen, " + lost + " pedi</p>";
+    html += '<div class="tabs">';
+    [["tout", "Tout"], ["genyen", "Genyen"], ["pedi", "Pedi"]].forEach(function (pair) {
+      html += '<button class="tab-btn' + (ticketFilter === pair[0] ? " active" : "") + '" onclick="setFilter(\'' + pair[0] + '\')">' + pair[1] + "</button>";
+    });
+    html += "</div>";
+
+    if (filtered.length === 0) {
+      html += '<p class="empty">Pa gen fich pou wè isit la.</p>';
+    } else {
+      filtered.slice().sort(function (a, b) { return b.createdAt - a.createdAt; }).forEach(function (t) {
+        html += renderTicketCard(t);
+      });
+    }
+    return html;
+  }
+
+  function renderKob() {
+    var mt = monthTickets();
+    var played = mt.reduce(function (s, t) { return s + (Number(t.amountPlayed) || 0); }, 0);
+    var won = mt.filter(function (t) { return t.result === "genyen"; }).reduce(function (s, t) { return s + (Number(t.amountWon) || 0); }, 0);
+    var lost = mt.filter(function (t) { return t.result === "pedi"; }).reduce(function (s, t) { return s + (Number(t.amountPlayed) || 0); }, 0);
+    var benefis = won - lost;
+
+    var teamStats = {};
+    mt.forEach(function (t) {
+      (t.teams || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (team) {
+        if (!teamStats[team]) teamStats[team] = { won: 0, lost: 0 };
+        if (t.result === "genyen") teamStats[team].won += 1;
+        else teamStats[team].lost += 1;
+      });
+    });
+    var topLosers = Object.keys(teamStats).map(function (k) { return [k, teamStats[k]]; })
+      .filter(function (e) { return e[1].lost > 0; }).sort(function (a, b) { return b[1].lost - a[1].lost; }).slice(0, 5);
+    var topWinners = Object.keys(teamStats).map(function (k) { return [k, teamStats[k]]; })
+      .filter(function (e) { return e[1].won > 0; }).sort(function (a, b) { return b[1].won - a[1].won; }).slice(0, 5);
+
+    function statCard(label, value, color) {
+      return '<div class="stat-card"><p class="label">' + label + '</p><p class="value" style="color:' + color + '">' + fmtMoney(value) + " G</p></div>";
+    }
+    var html = "<h2 style='margin-bottom:16px'>Kòb</h2>";
+    html += '<div class="grid-2" style="margin-bottom:12px">';
+    html += statCard("Kòb jwe", played, "var(--text)");
+    html += statCard("Benefis", benefis, benefis >= 0 ? "var(--lime)" : "var(--red)");
+    html += "</div>";
+    html += '<div class="grid-2" style="margin-bottom:24px">';
+    html += statCard("Kòb genyen", won, "var(--lime)");
+    html += statCard("Kòb pedi", lost, "var(--red)");
+    html += "</div>";
+
+    function teamList(title, color, data, field) {
+      var h = '<p class="team-list-title" style="color:' + color + '">' + title + "</p>";
+      if (data.length === 0) {
+        h += '<p class="muted" style="font-size:12px;margin-bottom:20px">Poko gen ase done.</p>';
+      } else {
+        data.forEach(function (e, i) {
+          h += '<div class="team-row"><span style="color:#cbd5e1">' + (i + 1) + ". " + esc(e[0]) + '</span><span style="font-weight:700;color:' + color + '">' + e[1][field] + "</span></div>";
+        });
+        h += '<div style="height:12px"></div>';
+      }
+      return h;
+    }
+    html += teamList("📉 Ekip ki fè w pedi plis", "var(--red)", topLosers, "lost");
+    html += teamList("📈 Ekip ou genyen plis ladan", "var(--lime)", topWinners, "won");
+    return html;
+  }
+
+  function renderChanpyona() {
+    var mt = monthTickets();
+    var map = {};
+    mt.forEach(function (t) {
+      var c = t.championship || "Pa presize";
+      if (!map[c]) map[c] = { won: 0, lost: 0 };
+      if (t.result === "genyen") map[c].won += 1;
+      else map[c].lost += 1;
+    });
+    var entries = Object.keys(map).map(function (k) { return [k, map[k]]; })
+      .sort(function (a, b) { return (b[1].won + b[1].lost) - (a[1].won + a[1].lost); });
+    var topWin = entries.slice().sort(function (a, b) { return b[1].won - a[1].won; })[0];
+
+    var html = "<h2 style='margin-bottom:16px'>Chanpyona yo</h2>";
+    if (entries.length === 0) html += '<p class="empty">Poko gen fich pou mwa sa a.</p>';
+
+    if (topWin && topWin[1].won > 0) {
+      html += '<div class="champ-highlight"><p style="font-size:11px;color:var(--sky);font-weight:700;margin:0 0 4px">Chanpyona ou pi genyen ladan</p>';
+      html += '<p style="font-weight:700;margin:0">' + esc(topWin[0]) + "</p>";
+      html += '<p class="muted" style="margin:4px 0 0">' + topWin[1].won + " match genyen</p></div>";
+    }
+    entries.forEach(function (e) {
+      html += '<div class="champ-row"><span style="font-weight:600">' + esc(e[0]) + '</span><span style="font-size:12px"><span style="color:var(--lime);font-weight:700">' + e[1].won + 'G</span> <span style="color:var(--red);font-weight:700">' + e[1].lost + "P</span></span></div>";
+    });
+    return html;
+  }
+
+  function renderAjoute() {
+    var months = lastNMonths(9);
+    var monthOptions = months.map(function (m) {
+      return '<option value="' + m + '">' + esc(monthLabel(m)) + "</option>";
+    }).join("");
+
+    var html = "<h2 style='margin-bottom:16px'>Ajoute yon fich</h2>";
+    html += '<form onsubmit="submitTicket(event)">';
+
+    html += '<div class="field"><label class="field-label">Captura fich la</label>';
+    html += '<label class="upload-box" id="upload-box">';
+    if (pendingScreenshot) {
+      html += '<img src="' + pendingScreenshot + '" alt="Apèsi" />';
+    } else {
+      html += '<span class="upload-placeholder">📷 Chwazi imaj la</span>';
+    }
+    html += '<input type="file" accept="image/*" onchange="handleFile(event)" /></label>';
+    if (pendingScreenshot) {
+      html += '<button type="button" class="remove-img" onclick="removeScreenshot()">Retire imaj la</button>';
+    }
+    html += "</div>";
+
+    html += '<div class="field"><label class="field-label">Mwa</label><select id="f-month">' + monthOptions + "</select></div>";
+
+    html += '<div class="field"><label class="field-label">Kantite kòb jwe (G)</label>';
+    html += '<input type="number" step="0.01" id="f-amountPlayed" placeholder="0.00" /></div>';
+
+    html += '<div class="field"><label class="field-label">Rezilta</label>';
+    html += '<div class="toggle-row">';
+    html += '<button type="button" id="btn-result-genyen" class="toggle-btn active-won" onclick="setFormResult(\'genyen\')">Genyen</button>';
+    html += '<button type="button" id="btn-result-pedi" class="toggle-btn" onclick="setFormResult(\'pedi\')">Pedi</button>';
+    html += "</div></div>";
+
+    html += '<div class="field" id="field-amountWon"><label class="field-label">Kantite kòb genyen (G)</label>';
+    html += '<input type="number" step="0.01" id="f-amountWon" placeholder="0.00" /></div>';
+
+    html += '<div class="field"><label class="field-label">Ekip yo (separe ak vigil ,)</label>';
+    html += '<input type="text" id="f-teams" placeholder="Real Madrid, PSG..." /></div>';
+
+    html += '<div class="field"><label class="field-label">Chanpyona</label>';
+    html += '<input type="text" id="f-championship" placeholder="Champions League..." /></div>';
+
+    html += '<p class="error-text" id="f-error"></p>';
+
+    html += '<div class="btn-row">';
+    html += '<button type="button" class="btn-secondary" onclick="goScreen(\'dashboard\')">Anile</button>';
+    html += '<button type="submit" class="btn-primary" style="flex:1">➕ Sove fich la</button>';
+    html += "</div>";
+    html += "</form>";
+    return html;
+  }
+
+  function render() {
+    var app = document.getElementById("app");
+    var html = "";
+
+    html += '<div class="topbar">';
+    if (screen !== "dashboard") {
+      html += '<button class="back-btn" onclick="goScreen(\'dashboard\')">← Tounen</button>';
+    } else {
+      html += '<div class="topbar-title">🎫 Ingénieur_Dawin_PariTrack</div>';
+    }
+    html += "</div>";
+
+    html += "<main>";
+    if (screen === "dashboard") html += renderDashboard();
+    if (screen !== "dashboard" && screen !== "ajoute") html += renderMonthPicker();
+    if (screen === "fich") html += renderFich();
+    if (screen === "kob") html += renderKob();
+    if (screen === "chanpyona") html += renderChanpyona();
+    if (screen === "ajoute") html += renderAjoute();
+    html += "</main>";
+
+    app.innerHTML = html;
+
+    if (screen === "ajoute") {
+      var wonField = document.getElementById("field-amountWon");
+      if (wonField) wonField.style.display = formResult === "genyen" ? "block" : "none";
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
